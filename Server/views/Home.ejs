@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<div style="width:auto; margin: 30vh 34vw; height: 32vh; border-style:dotted;">
+    <h1>sucessfully !! You are Logged in.</h1>
+    <h3> Welcome to Gmail Mail Automator !!</h3>
+    <button onclick=logout()>Log-Out</button>
+    <form action="/automate" method="get">
+        <button type="submit">Automate</button>
+    </form>
+</div>
+</body>
+<script>
+    let params = {};
+
+    let regex = /([^&=]+)=([^&]*)/g, margin
+
+    while(m = regex.exec(location.href)){
+        params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+    }
+
+    if(Object.keys(params).length > 0){
+        localStorage.setItem('authInfo',JSON.stringify(params));
+    }
+
+    //hidding the acess token 
+    window.history.pushState({},document.title,"/"+"home");
+
+    let info = JSON.parse(localStorage.getItem('authInfo'));
+    // console.log(info);
+
+    function logout(){
+        fetch("https://oauth2.googleapis.com/revoke?token=" + info['access_token'],{
+            method : 'POST',
+            headers : {
+                'Content-type' : 'application/x-www-form-urlencoded'
+            }
+        })
+        .then((data)=>{
+            location.href = '/';
+        })
+    }
+
+</script>
+</html>

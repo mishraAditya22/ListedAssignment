@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<div style="width:auto; margin: 30vh 34vw; height: 32vh; border-style:dotted;">
+    <h1>sucessfully !! Email Automation Started !!.</h1>
+    <button onclick=logout()>Log-Out</button>
+</div>
+</body>
+
+<script src="https://smtpjs.com/v3/smtp.js"></script>
+
+<script>
+
+
+    function sendMessage(to){
+        Email.send({
+            Host : "smtp.elasticemail.com",
+            Username : "adityalisted4@gmail.com",
+            Password : "59A26B845FAE136D36BE52CB026409275AB1",
+            To : `${to}`,
+            From : "adityalisted4@gmail.com",
+            Subject : "Thanks For Contacting ",
+            Body : "Thanks for your interset in us , we'll get back to you soon , Thank You"
+        }).then(
+        message => console.log(message)
+        );
+    }
+
+
+    let info = JSON.parse(localStorage.getItem('authInfo'));
+
+    function getMessages(){
+
+        let ACCESS_TOKEN = info['access_token']; 
+
+        fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5",{
+            method:'GET',
+            headers : new Headers({Authorization: `Bearer ${ACCESS_TOKEN}`})
+            })
+            .then((data)=>data.json())
+            .then((info)=>{
+                let Mails = info.messages;
+                let Thread_ids = new Set();
+                //storing the distinct thread_d into th set 
+                Array.from(Mails).forEach((data)=>{
+                    Thread_ids.add(data.threadId);
+                })
+
+
+                for(let thread_id of Thread_ids){
+                    // console.log(thread_id);
+                    fetch(`https://gmail.googleapis.com/gmail/v1/users/me/threads/${thread_id}`,{
+                        method : 'GET',
+                        headers : new Headers({Authorization : `Bearer ${ACCESS_TOKEN}`})
+                    })
+                    .then((data)=>data.json())
+                    .then((info_last)=>{
+                        if(info_last.messages.length===1){
+                            Array.from(info_last.messages).forEach((tmp)=>{
+                                Array.from(tmp.payload.headers).forEach((emails)=>{
+                                    if(emails.name=='From'){
+                                        l = emails.value.split("<");
+                                        let address = l[1];
+                                        address = address.substring(0, address.length - 1);
+                                        console.log(address);
+                                        sendMessage(address);
+                                    }
+                                })
+                            })
+                        }
+                    })
+                }
+            })
+        }
+
+    //for sending mail in every 5 seconds
+    setInterval(getMessages,5000);
+
+    function logout(){
+        fetch("https://oauth2.googleapis.com/revoke?token=" + info['access_token'],{
+            method : 'POST',
+            headers : {
+                'Content-type' : 'application/x-www-form-urlencoded'
+            }
+        })
+        .then((data)=>{
+            location.href = '/';
+        })
+    }
+
+</script>
+</html>

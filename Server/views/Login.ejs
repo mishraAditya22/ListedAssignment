@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<div style="width:auto; margin: 30vh 34vw; height: 32vh; border-style:dotted;">
+    <div style="margin: 9vh 8vw">
+        <h2>Login with Gmail</h2>
+        <button onclick=signIn()>Login with Gmail</button>
+    </div>
+</div>
+</body>
+
+<!-- js function to login the user using google auth  -->
+<script>
+    function signIn(){
+        console.log("Loggin Started !");
+        let oauth2Endpoint = "https://accounts.google.com/o/oauth2/v2/auth";
+        let form = document.createElement('form');
+        form.setAttribute('method','GET');
+        form.setAttribute('action',oauth2Endpoint);
+        let params_id = {
+            "client_id" : "353945942709-sod8ru9ngro8bfr1p498d17aqsu8d594.apps.googleusercontent.com",
+            "redirect_uri" : "http://localhost:8000/home",
+            "response_type" : "token",
+            "scope" : "https://mail.google.com",
+            "include_granted_scopes" : 'true',
+            "state" : 'pass-through-value'
+        }
+        for(let p in params_id){
+            let input = document.createElement('input');
+            input.setAttribute('type','hidden')
+            input.setAttribute('name',p)
+            input.setAttribute('value',params_id[p])
+            form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+
+        form.submit();
+    } 
+</script>
+</html>
